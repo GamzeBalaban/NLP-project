@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yorum Analizi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #4CAF50;
+            font-size: 28px;
+            font-weight:600;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            resize: none;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .emoji {
+            font-size: 40px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Yorum Analizi</h2>
+        <textarea id="textInput" placeholder="Bir cümle yazın..." maxlength="500"></textarea>
+        <br>
+        <button onclick="predict()">Tahmin Et</button>
+        <div id="result"></div>
+        <div id="emoji" class="emoji"></div>
+    </div>
+
+    <script>
+        async function predict() {
+            const text = document.getElementById("textInput").value;
+            if (text.trim() === "") {
+                alert("Lütfen bir yorum girin!");
+                return;
+            }
+
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: text })
+            });
+
+            const result = await response.json();
+            const resultElement = document.getElementById("result");
+            const emojiElement = document.getElementById("emoji");
+
+            let emoji = "";
+            let sentimentText = "";
+
+            if (result.sentiment === "negative") {
+                emoji = "😠";
+                sentimentText = "Negatif";
+                resultElement.style.color = "#d32f2f";
+            } else if (result.sentiment === "positive") {
+                emoji = "😊";
+                sentimentText = "Pozitif";
+                resultElement.style.color = "#388e3c";
+            } else {
+                emoji = "😐";
+                sentimentText = "Nötr";
+                resultElement.style.color = "#1976d2";
+            }
+
+            resultElement.innerHTML = `Sonuç: ${sentimentText}`;
+            emojiElement.innerHTML = emoji;
+        }
+    </script>
+</body>
+
+</html>
